@@ -37,7 +37,7 @@ class _UsersPageState extends State<UsersPage> {
           children: [
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
-                stream: _firestore.collection('users').snapshots(),
+                stream: _firestore.collection('Students').snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
                     return const Text("Error loading users", style: TextStyle(color: Colors.white));
@@ -55,7 +55,7 @@ class _UsersPageState extends State<UsersPage> {
                       final user = users[index];
                       return ListTile(
                         title: Text(
-                          "Name: ${user['name']}, Index: ${user['index']}, Password: ${user['password']}",
+                          "Name: ${user['fullName']}, Index: ${user['index']}, Password: ${user['password']}",
                           style: const TextStyle(color: Colors.white),
                         ),
                         trailing: Row(
@@ -64,7 +64,7 @@ class _UsersPageState extends State<UsersPage> {
                             IconButton(
                               icon: const Icon(Icons.edit, color: Colors.white),
                               onPressed: () {
-                                _editUser(user.id, user['name'], user['index'], user['password']);
+                                _editUser(user.id, user['fullName'], user['index'], user['password']);
                               },
                             ),
                             IconButton(
