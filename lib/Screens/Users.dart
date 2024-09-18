@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -10,101 +8,40 @@ class UsersPage extends StatefulWidget {
 
 class _UsersPageState extends State<UsersPage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final TextEditingController _userIndexController = TextEditingController();
-  final TextEditingController _userPasswordController = TextEditingController();
-  final TextEditingController _userNameController = TextEditingController();  // Added controller for name
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0A0E21),
-      appBar: AppBar(
-        title: const Text('Manage Users',style: TextStyle(color: Colors.white),),
-        leading: IconButton(onPressed: (){Navigator.pop(context);}, icon: Icon(Icons.arrow_back ,color: Colors.white,)),
-        backgroundColor: const Color(0xFF141A2E),
-        
-        actions: [
-          // Delete All Button
-          IconButton(
-            icon: const Icon(Icons.delete_forever),
-            onPressed: _deleteAllUsers,
-          ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Expanded(
-              child: StreamBuilder<QuerySnapshot>(
-                stream: _firestore.collection('Students').snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasError) {
-                    return const Text("Error loading users", style: TextStyle(color: Colors.white));
-                  }
+  final TextEditingController _fullNameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _facultyController = TextEditingController();
+  final TextEditingController _gpaController = TextEditingController();
+  final TextEditingController _indexController = TextEditingController();
+  final TextEditingController _majorIdController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _semesterController = TextEditingController();
+  final TextEditingController _yearController = TextEditingController();
 
-                  if (!snapshot.hasData) {
-                    return Center(child: const CircularProgressIndicator(color: Colors.white,));
-                  }
+  // Method to validate fields before saving
+  bool _validateFields() {
+    if (_fullNameController.text.isEmpty ||
+        _emailController.text.isEmpty ||
+        _facultyController.text.isEmpty ||
+        _gpaController.text.isEmpty ||
+        _indexController.text.isEmpty ||
+        _majorIdController.text.isEmpty ||
+        _passwordController.text.isEmpty ||
+        _semesterController.text.isEmpty ||
+        _yearController.text.isEmpty) {
+      return false;
+    }
+    return true;
+  }
 
-                  final users = snapshot.data!.docs;
-
-                  return ListView.builder(
-                    itemCount: users.length,
-                    itemBuilder: (context, index) {
-                      final user = users[index];
-                      return ListTile(
-                        title: Text(
-                          "Name: ${user['fullName']}, Index: ${user['index']}, Password: ${user['password']}",
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.edit, color: Colors.white),
-                              onPressed: () {
-                                _editUser(user.id, user['fullName'], user['index'], user['password']);
-                              },
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: () {
-                                _deleteUser(user.id);
-                              },
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                _addUser();
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-              child: const Text("Add New User",style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),),
-            ),
-          ],
-        ),
-      ),
+  // Method to build text fields
+  Widget _buildTextField(TextEditingController controller, String labelText, {bool isNumber = false}) {
+    return TextField(
+      controller: controller,
+      keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+      decoration: InputDecoration(labelText: labelText),
     );
-  }
-
-  // Add User Dialog
-  void _addUser() {
-    _showEditUserDialog();
-  }
-
-  // Edit User Function
-  void _editUser(String userId, String name, String index, String password) {
-    _userNameController.text = name;  // Set name in the text field
-    _userIndexController.text = index;
-    _userPasswordController.text = password;
-    _showEditUserDialog(userId: userId);
   }
 
   // Show User Edit Dialog
@@ -114,50 +51,57 @@ class _UsersPageState extends State<UsersPage> {
       builder: (context) {
         return AlertDialog(
           backgroundColor: const Color(0xFF141A2E),
-          title: const Text("Edit User", style: TextStyle(color: Colors.white)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                style: TextStyle(
-                  color: Colors.white, // Replace with your desired color
-                ),
-                controller: _userNameController,  // TextField for name
-                decoration: const InputDecoration(hintText: 'User Name'),
-              ),
-              TextField(
-                style: TextStyle(
-                  color: Colors.white, // Replace with your desired color
-                ),
-                controller: _userIndexController,
-                decoration: const InputDecoration(hintText: 'User Index'),
-              ),
-              TextField(
-                style: TextStyle(
-                  color: Colors.white, // Replace with your desired color
-                ),
-                controller: _userPasswordController,
-                decoration: const InputDecoration(hintText: 'User Password'),
-              ),
-            ],
+          title: Text(userId == null ? "Add User" : "Edit User",
+              style: const TextStyle(color: Colors.white)),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildTextField(_fullNameController, 'Full Name'),
+                _buildTextField(_emailController, 'Email'),
+                _buildTextField(_facultyController, 'Faculty'),
+                _buildTextField(_gpaController, 'GPA', isNumber: true),
+                _buildTextField(_indexController, 'Index', isNumber: true),
+                _buildTextField(_majorIdController, 'Major ID', isNumber: true),
+                _buildTextField(_passwordController, 'Password'),
+                _buildTextField(_semesterController, 'Semester'),
+                _buildTextField(_yearController, 'Year', isNumber: true),  // Ensure year accepts numbers
+              ],
+            ),
           ),
           actions: [
             ElevatedButton(
               onPressed: () {
-                if (userId == null) {
-                  _firestore.collection('users').add({
-                    'name': _userNameController.text,  // Add name to Firestore
-                    'index': _userIndexController.text,
-                    'password': _userPasswordController.text,
-                  });
-                } else {
-                  _firestore.collection('users').doc(userId).update({
-                    'name': _userNameController.text,  // Update name in Firestore
-                    'index': _userIndexController.text,
-                    'password': _userPasswordController.text,
-                  });
+                if (_validateFields()) {
+                  if (userId == null) {
+                    // Add new user
+                    _firestore.collection('Students').doc(_indexController.text).set({
+                      'fullName': _fullNameController.text,
+                      'email': _emailController.text,
+                      'faculty': _facultyController.text,
+                      'gpa': double.tryParse(_gpaController.text) ?? 0.0,
+                      'index': int.parse(_indexController.text),
+                      'majorId': int.parse(_majorIdController.text),
+                      'password': _passwordController.text,
+                      'semester': _semesterController.text,
+                      'year': int.tryParse(_yearController.text) ?? 0, // Parse as int
+                    });
+                  } else {
+                    // Update existing user
+                    _firestore.collection('Students').doc(userId).update({
+                      'fullName': _fullNameController.text,
+                      'email': _emailController.text,
+                      'faculty': _facultyController.text,
+                      'gpa': double.tryParse(_gpaController.text) ?? 0.0,
+                      'index': int.parse(_indexController.text),
+                      'majorId': int.parse(_majorIdController.text),
+                      'password': _passwordController.text,
+                      'semester': _semesterController.text,
+                      'year': int.tryParse(_yearController.text) ?? 0, // Parse as int
+                    });
+                  }
+                  Navigator.of(context).pop();
                 }
-                Navigator.of(context).pop();
               },
               child: const Text("Save"),
             ),
@@ -167,20 +111,32 @@ class _UsersPageState extends State<UsersPage> {
     );
   }
 
-  // Delete a specific user
-  void _deleteUser(String userId) {
-    _firestore.collection('users').doc(userId).delete();
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Edit User'),
+      ),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () => _showEditUserDialog(),
+          child: const Text('Show Edit Dialog'),
+        ),
+      ),
+    );
   }
 
-  // Delete all users
-  void _deleteAllUsers() async {
-    final usersCollection = _firestore.collection('users');
-
-    // Get all documents in the 'users' collection
-    var snapshots = await usersCollection.get();
-
-    for (var doc in snapshots.docs) {
-      await doc.reference.delete(); // Delete each document
-    }
+  @override
+  void dispose() {
+    _fullNameController.dispose();
+    _emailController.dispose();
+    _facultyController.dispose();
+    _gpaController.dispose();
+    _indexController.dispose();
+    _majorIdController.dispose();
+    _passwordController.dispose();
+    _semesterController.dispose();
+    _yearController.dispose();
+    super.dispose();
   }
 }
