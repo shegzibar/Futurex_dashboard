@@ -1,5 +1,4 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -16,11 +15,19 @@ class _UsersPageState extends State<UsersPage> {
   final TextEditingController _userPasswordController = TextEditingController();
   final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _facultyController = TextEditingController();
   final TextEditingController _gpaController = TextEditingController();
-  final TextEditingController _majorIdController = TextEditingController();
-  final TextEditingController _semesterController = TextEditingController();
-  final TextEditingController _yearController = TextEditingController();
+
+  // Dropdown selections
+  String? _selectedFaculty;
+  String? _selectedMajor;
+  String? _selectedSemester;
+  String? _selectedYear;
+
+  // Dropdown lists
+  final List<String> faculties = ['Computer science', 'Architecture', 'Design ', 'Business','IT','Telecommunication'];
+  final List<String> majors = ['1', '2', '3', '4','5','6','7','8']; // Replace with actual major IDs
+  final List<String> semesters = ['1st semester', '2nd semester', '3rd semester','4th semester','5th semester','6th semester','7th semester','8th semester','9th semester','10th semester'];
+  final List<String> years = ['2000', '2001', '2002', '2003', '2004','2005','2006','2007','2008','2009','2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025','2026','2027']; // For undergrad years
 
   @override
   Widget build(BuildContext context) {
@@ -150,11 +157,11 @@ class _UsersPageState extends State<UsersPage> {
     _userIndexController.text = index;
     _userPasswordController.text = password;
     _emailController.text = email;
-    _facultyController.text = faculty;
     _gpaController.text = gpa;
-    _majorIdController.text = majorId;
-    _semesterController.text = semester;
-    _yearController.text = year;
+    _selectedFaculty = faculty;
+    _selectedMajor = majorId;
+    _selectedSemester = semester;
+    _selectedYear = year;
     _showEditUserDialog(userId: userId);
   }
 
@@ -189,13 +196,24 @@ class _UsersPageState extends State<UsersPage> {
                     hintStyle: TextStyle(color: Colors.white54),
                   ),
                 ),
-                TextField(
-                  style: const TextStyle(color: Colors.white),
-                  controller: _facultyController,
+                DropdownButtonFormField<String>(
+                  value: _selectedFaculty,
+                  dropdownColor: const Color(0xFF141A2E),
                   decoration: const InputDecoration(
                     hintText: 'Faculty',
                     hintStyle: TextStyle(color: Colors.white54),
                   ),
+                  items: faculties.map((String faculty) {
+                    return DropdownMenuItem<String>(
+                      value: faculty,
+                      child: Text(faculty, style: const TextStyle(color: Colors.white)),
+                    );
+                  }).toList(),
+                  onChanged: (newValue) {
+                    setState(() {
+                      _selectedFaculty = newValue;
+                    });
+                  },
                 ),
                 TextField(
                   style: const TextStyle(color: Colors.white),
@@ -206,31 +224,62 @@ class _UsersPageState extends State<UsersPage> {
                     hintStyle: TextStyle(color: Colors.white54),
                   ),
                 ),
-                TextField(
-                  style: const TextStyle(color: Colors.white),
-                  controller: _majorIdController,
-                  keyboardType: TextInputType.number,
+                DropdownButtonFormField<String>(
+                  value: _selectedMajor,
+                  dropdownColor: const Color(0xFF141A2E),
                   decoration: const InputDecoration(
                     hintText: 'Major ID',
                     hintStyle: TextStyle(color: Colors.white54),
                   ),
+                  items: majors.map((String majorId) {
+                    return DropdownMenuItem<String>(
+                      value: majorId,
+                      child: Text(majorId, style: const TextStyle(color: Colors.white)),
+                    );
+                  }).toList(),
+                  onChanged: (newValue) {
+                    setState(() {
+                      _selectedMajor = newValue;
+                    });
+                  },
                 ),
-                TextField(
-                  style: const TextStyle(color: Colors.white),
-                  controller: _semesterController,
+                DropdownButtonFormField<String>(
+                  value: _selectedSemester,
+                  dropdownColor: const Color(0xFF141A2E),
                   decoration: const InputDecoration(
                     hintText: 'Semester',
                     hintStyle: TextStyle(color: Colors.white54),
                   ),
+                  items: semesters.map((String semester) {
+                    return DropdownMenuItem<String>(
+                      value: semester,
+                      child: Text(semester, style: const TextStyle(color: Colors.white)),
+                    );
+                  }).toList(),
+                  onChanged: (newValue) {
+                    setState(() {
+                      _selectedSemester = newValue;
+                    });
+                  },
                 ),
-                TextField(
-                  style: const TextStyle(color: Colors.white),
-                  controller: _yearController,
-                  keyboardType: TextInputType.number,
+                DropdownButtonFormField<String>(
+                  value: _selectedYear,
+                  dropdownColor: const Color(0xFF141A2E),
                   decoration: const InputDecoration(
                     hintText: 'Year',
                     hintStyle: TextStyle(color: Colors.white54),
                   ),
+                  items: years.map((String year) {
+                    return DropdownMenuItem<String>(
+                      value: year,
+                      child: Text(year, style: const TextStyle(color: Colors.white)),
+                    );
+                  }).toList(),
+                  onChanged: (newValue) {
+                    setState(() {
+                      _selectedYear = newValue;
+                    });
+                  },
                 ),
                 TextField(
                   style: const TextStyle(color: Colors.white),
@@ -254,7 +303,6 @@ class _UsersPageState extends State<UsersPage> {
           actions: [
             ElevatedButton(
               onPressed: () async {
-                // Validate inputs if necessary
                 if (_userNameController.text.isEmpty ||
                     _emailController.text.isEmpty ||
                     _userIndexController.text.isEmpty ||
@@ -268,74 +316,72 @@ class _UsersPageState extends State<UsersPage> {
                   return;
                 }
 
-                if (userId == null) {
-                  // Add new user to Firestore
-                  try {
-                    await _firestore.collection('Students').add({
+                final userIndex = _userIndexController.text;
+
+                try {
+                  if (userId == null) {
+                    // Check if user with the same index already exists
+                    final existingUser = await _firestore.collection('Students').doc(userIndex).get();
+                    if (existingUser.exists) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: const Text('User with this index already exists'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                      return;
+                    }
+
+                    // Add new user with index as document ID
+                    await _firestore.collection('Students').doc(userIndex).set({
                       'fullName': _userNameController.text,
                       'email': _emailController.text,
-                      'faculty': _facultyController.text,
+                      'faculty': _selectedFaculty,
                       'gpa': double.tryParse(_gpaController.text) ?? 0.0,
-                      'index': _userIndexController.text,
-                      'majorId': int.tryParse(_majorIdController.text) ?? 0,
+                      'index': userIndex,
+                      'majorId': int.tryParse(_selectedMajor ?? '0') ?? 0,
                       'password': _userPasswordController.text,
-                      'semester': _semesterController.text,
-                      'year': int.tryParse(_yearController.text) ?? 0,
+                      'semester': _selectedSemester,
+                      'year': int.tryParse(_selectedYear ?? '0') ?? 0,
                     });
 
-                    Navigator.of(context).pop();
-
-                    // Show success message
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: const Text('User created successfully'),
                         backgroundColor: Colors.green,
                       ),
                     );
-                  } catch (e) {
-                    // Handle errors
-                    Navigator.of(context).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Failed to create user: $e'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                } else {
-                  // Update existing user
-                  try {
+                  } else {
+                    // Update existing user
                     await _firestore.collection('Students').doc(userId).update({
                       'fullName': _userNameController.text,
                       'email': _emailController.text,
-                      'faculty': _facultyController.text,
+                      'faculty': _selectedFaculty,
                       'gpa': double.tryParse(_gpaController.text) ?? 0.0,
-                      'index': _userIndexController.text,
-                      'majorId': int.tryParse(_majorIdController.text) ?? 0,
+                      'index': userIndex,
+                      'majorId': int.tryParse(_selectedMajor ?? '0') ?? 0,
                       'password': _userPasswordController.text,
-                      'semester': _semesterController.text,
-                      'year': int.tryParse(_yearController.text) ?? 0,
+                      'semester': _selectedSemester,
+                      'year': int.tryParse(_selectedYear ?? '0') ?? 0,
                     });
 
-                    Navigator.of(context).pop();
-
-                    // Show success message
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: const Text('User updated successfully'),
                         backgroundColor: Colors.green,
                       ),
                     );
-                  } catch (e) {
-                    // Handle errors
-                    Navigator.of(context).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Failed to update user: $e'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
                   }
+
+                  Navigator.of(context).pop();
+                } catch (e) {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Failed to save user: $e'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
                 }
               },
               child: const Text("Save"),
@@ -351,7 +397,6 @@ class _UsersPageState extends State<UsersPage> {
     try {
       await _firestore.collection('Students').doc(userId).delete();
 
-      // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('User deleted successfully'),
@@ -359,7 +404,6 @@ class _UsersPageState extends State<UsersPage> {
         ),
       );
     } catch (e) {
-      // Handle errors
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to delete user: $e'),
@@ -378,7 +422,6 @@ class _UsersPageState extends State<UsersPage> {
       await doc.reference.delete();
     }
 
-    // Show success message
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text('All users deleted successfully'),
@@ -391,25 +434,20 @@ class _UsersPageState extends State<UsersPage> {
   void _clearTextControllers() {
     _userNameController.clear();
     _emailController.clear();
-    _facultyController.clear();
     _gpaController.clear();
-    _majorIdController.clear();
-    _semesterController.clear();
-    _yearController.clear();
     _userIndexController.clear();
     _userPasswordController.clear();
+    _selectedFaculty = null;
+    _selectedMajor = null;
+    _selectedSemester = null;
+    _selectedYear = null;
   }
 
   @override
   void dispose() {
-    // Dispose controllers when the widget is disposed
     _userNameController.dispose();
     _emailController.dispose();
-    _facultyController.dispose();
     _gpaController.dispose();
-    _majorIdController.dispose();
-    _semesterController.dispose();
-    _yearController.dispose();
     _userIndexController.dispose();
     _userPasswordController.dispose();
     super.dispose();

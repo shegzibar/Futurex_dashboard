@@ -18,14 +18,40 @@ class _NewsPageState extends State<NewsPage> {
   Timestamp? _newsTime; // To store the selected timestamp
   String _formattedTime = "Pick a Date & Time"; // To show on the button before selection
 
+  String? _selectedYear; // To store selected year from dropdown
+  List<String> _years = []; // To store years from 'Students' collection
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchYears();
+  }
+
+  // Fetch years from the 'Students' collection
+  Future<void> _fetchYears() async {
+    final studentsSnapshot = await _firestore.collection('Students').get();
+
+    setState(() {
+      _years = studentsSnapshot.docs
+          .map((doc) => doc['year'].toString()) // Assuming 'year' is a field in 'Students'
+          .toSet()
+          .toList(); // Using toSet() to ensure no duplicates
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0A0E21),
       appBar: AppBar(
-        title: const Text('Manage News',style: TextStyle(color: Colors.white),),
+        title: const Text('Manage News', style: TextStyle(color: Colors.white)),
         backgroundColor: const Color(0xFF141A2E),
-        leading: IconButton(onPressed: (){Navigator.pop(context);}, icon: Icon(Icons.arrow_back ,color: Colors.white,)),
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+        ),
         actions: [
           // Delete All Button
           IconButton(
@@ -47,7 +73,9 @@ class _NewsPageState extends State<NewsPage> {
                   }
 
                   if (!snapshot.hasData) {
-                    return Center(child: const CircularProgressIndicator(color: Colors.white,));
+                    return Center(
+                      child: const CircularProgressIndicator(color: Colors.white),
+                    );
                   }
 
                   final newsList = snapshot.data!.docs;
@@ -62,7 +90,7 @@ class _NewsPageState extends State<NewsPage> {
 
                       return ListTile(
                         title: Text(
-                          "Title: ${news['title']}, From: ${news['from']}, Time: $formattedDate",
+                          "Title: ${news['title']}, From: ${news['from']}, Time: $formattedDate, Year: ${news['year']}",
                           style: const TextStyle(color: Colors.white),
                         ),
                         trailing: Row(
@@ -71,7 +99,7 @@ class _NewsPageState extends State<NewsPage> {
                             IconButton(
                               icon: const Icon(Icons.edit, color: Colors.white),
                               onPressed: () {
-                                _editNews(news.id, news['title'], news['news'], news['from'], timestamp);
+                                _editNews(news.id, news['title'], news['news'], news['from'], timestamp, news['year']);
                               },
                             ),
                             IconButton(
@@ -93,7 +121,7 @@ class _NewsPageState extends State<NewsPage> {
                 _addNews();
               },
               style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-              child: const Text("Add New News", style: TextStyle(color: Colors.white ,fontWeight: FontWeight.bold),),
+              child: const Text("Add New News", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -107,12 +135,13 @@ class _NewsPageState extends State<NewsPage> {
   }
 
   // Edit News Function
-  void _editNews(String newsId, String title, String content, String from, Timestamp time) {
+  void _editNews(String newsId, String title, String content, String from, Timestamp time, String year) {
     _newsTitleController.text = title;
     _newsContentController.text = content;
     _newsFromController.text = from;
     _newsTime = time; // Set existing time
     _formattedTime = DateFormat.yMMMd().add_jm().format(time.toDate());
+    _selectedYear = year; // Set existing year
     _showEditNewsDialog(newsId: newsId);
   }
 
@@ -128,27 +157,39 @@ class _NewsPageState extends State<NewsPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
-                style: TextStyle(
-                  color: Colors.white, // Replace with your desired color
-                ),
+                style: const TextStyle(color: Colors.white),
                 controller: _newsTitleController,
                 decoration: const InputDecoration(hintText: 'News Title'),
               ),
               TextField(
-                style: TextStyle(
-                  color: Colors.white, // Replace with your desired color
-                ),
+                style: const TextStyle(color: Colors.white),
                 controller: _newsContentController,
                 decoration: const InputDecoration(hintText: 'News Content'),
               ),
               TextField(
-                style: TextStyle(
-                  color: Colors.white, // Replace with your desired color
-                ),
+                style: const TextStyle(color: Colors.white),
                 controller: _newsFromController,
                 decoration: const InputDecoration(hintText: 'From'),
               ),
-              SizedBox(height: 10,),
+              const SizedBox(height: 10),
+              DropdownButton<String>(
+                value: _selectedYear,
+                hint: const Text('Select Year', style: TextStyle(color: Colors.white)),
+                dropdownColor: const Color(0xFF141A2E),
+                style: const TextStyle(color: Colors.white),
+                items: _years.map((year) {
+                  return DropdownMenuItem<String>(
+                    value: year,
+                    child: Text(year, style: const TextStyle(color: Colors.white)),
+                  );
+                }).toList(),
+                onChanged: (newYear) {
+                  setState(() {
+                    _selectedYear = newYear;
+                  });
+                },
+              ),
+              const SizedBox(height: 10),
               ElevatedButton(
                 onPressed: () async {
                   await _selectDateTime(context);
@@ -170,6 +211,7 @@ class _NewsPageState extends State<NewsPage> {
                     'news': _newsContentController.text,
                     'from': _newsFromController.text,
                     'time': _newsTime, // Use Timestamp field
+                    'year': _selectedYear, // Save selected year
                   });
                 } else {
                   _firestore.collection('News').doc(newsId).update({
@@ -177,6 +219,7 @@ class _NewsPageState extends State<NewsPage> {
                     'news': _newsContentController.text,
                     'from': _newsFromController.text,
                     'time': _newsTime, // Update Timestamp field
+                    'year': _selectedYear, // Update selected year
                   });
                 }
                 Navigator.of(context).pop();
