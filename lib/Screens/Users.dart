@@ -76,46 +76,77 @@ class _UsersPageState extends State<UsersPage> {
                     itemCount: users.length,
                     itemBuilder: (context, index) {
                       final user = users[index];
-                      return ListTile(
-                        title: Text(
-                          "Name: ${user['fullName']}, Index: ${user['index']}, Email: ${user['email']}, GPA: ${user['gpa']}, Faculty: ${user['faculty']}",
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                        subtitle: Text(
-                          "Semester: ${user['semester']}, Year: ${user['year']}, Major ID: ${user['majorId']}",
-                          style: const TextStyle(color: Colors.white54),
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.edit, color: Colors.white),
-                              onPressed: () {
-                                _editUser(
-                                  user.id,
-                                  user['fullName'],
-                                  user['index'],
-                                  user['password'],
-                                  user['email'],
-                                  user['faculty'],
-                                  user['gpa'].toString(),
-                                  user['majorId'].toString(),
-                                  user['semester'],
-                                  user['year'].toString(),
-                                );
-                              },
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: () {
-                                _deleteUser(user.id);
-                              },
-                            ),
-                          ],
+                      return Card(
+                        color: const Color(0xFF1A1D3A), // Slightly lighter than the background color
+                        margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 0.0),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        elevation: 4, // Add shadow for depth
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Name: ${user['fullName']}",
+                                style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                "Index: ${user['index']}",
+                                style: const TextStyle(color: Colors.white70, fontSize: 14),
+                              ),
+                              Text(
+                                "Email: ${user['email']}",
+                                style: const TextStyle(color: Colors.white70, fontSize: 14),
+                              ),
+                              Text(
+                                "GPA: ${user['gpa']}",
+                                style: const TextStyle(color: Colors.white70, fontSize: 14),
+                              ),
+                              Text(
+                                "Faculty: ${user['faculty']}",
+                                style: const TextStyle(color: Colors.white70, fontSize: 14),
+                              ),
+                              Text(
+                                "Semester: ${user['semester']}, Year: ${user['year']}",
+                                style: const TextStyle(color: Colors.white70, fontSize: 14),
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.edit, color: Colors.white),
+                                    onPressed: () {
+                                      _editUser(
+                                        user.id,
+                                        user['fullName'],
+                                        user['index'],
+                                        user['password'],
+                                        user['email'],
+                                        user['faculty'],
+                                        user['gpa'].toString(),
+                                        user['majorId'].toString(),
+                                        user['semester'],
+                                        user['year'].toString(),
+                                      );
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete, color: Colors.red),
+                                    onPressed: () {
+                                      _deleteUser(user.id);
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     },
                   );
+
                 },
               ),
             ),
