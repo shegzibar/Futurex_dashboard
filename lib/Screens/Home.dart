@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:futuerx_dashboard/Screens/News.dart';
 import 'package:futuerx_dashboard/Screens/Users.dart';
-// Import the FAQ page
+ // Import the FAQ page
 
 class Dashboard extends StatelessWidget {
   @override
@@ -17,7 +17,7 @@ class Dashboard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Users Button
-            StylishButton(
+            ThemeButton(
               label: 'Users',
               onPressed: () {
                 Navigator.push(
@@ -29,7 +29,7 @@ class Dashboard extends StatelessWidget {
             const SizedBox(height: 20),
 
             // News Button
-            StylishButton(
+            ThemeButton(
               label: 'News',
               onPressed: () {
                 Navigator.push(
@@ -41,7 +41,7 @@ class Dashboard extends StatelessWidget {
             const SizedBox(height: 20),
 
             // FAQ Button
-            StylishButton(
+            ThemeButton(
               label: 'FAQ',
               onPressed: () {
                 // Navigator.push(
@@ -57,12 +57,12 @@ class Dashboard extends StatelessWidget {
   }
 }
 
-// Reusable StylishButton widget
-class StylishButton extends StatelessWidget {
+// Reusable ThemeButton widget
+class ThemeButton extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
 
-  const StylishButton({required this.label, required this.onPressed});
+  const ThemeButton({required this.label, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -72,15 +72,15 @@ class StylishButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 20),
         backgroundColor: const Color(0xFF141A2E),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(40),
+          borderRadius: BorderRadius.zero, // No rounded corners
         ),
-        elevation: 10,
+        elevation: 5, // Adds a subtle shadow for depth
       ).copyWith(
         backgroundColor: MaterialStateProperty.resolveWith((states) {
           if (states.contains(MaterialState.pressed)) {
-            return const Color(0xFF141A2E).withOpacity(0.7);
+            return const Color(0xFF1F2A45); // Slightly darker when pressed
           }
-          return null;
+          return const Color(0xFF141A2E);
         }),
       ),
       child: Text(
