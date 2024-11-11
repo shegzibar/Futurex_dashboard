@@ -12,7 +12,9 @@ void main() async{
         storageBucket: "futurex-19db0.appspot.com",
         messagingSenderId: "826402051210",
         appId: "1:826402051210:web:2f7a77b6176d5fdff30973",
-        measurementId: "G-2HSE9CYSRG"),
+        measurementId: "G-2HSE9CYSRG",
+
+    ),
   );
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,

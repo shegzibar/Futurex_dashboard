@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:futuerx_dashboard/Screens/Faqs.dart';
 import 'package:futuerx_dashboard/Screens/News.dart';
 import 'package:futuerx_dashboard/Screens/Users.dart';
+import 'package:futuerx_dashboard/Screens/sheets.dart';
 // Import the FAQ and Lectures pages
 
 class Dashboard extends StatelessWidget {
@@ -64,11 +65,10 @@ class Dashboard extends StatelessWidget {
                 icon: Icons.book,
                 label: 'Lectures Sheets',
                 onPressed: () {
-                  // Navigate to Lectures Page
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(builder: (context) => LecturesPage()),
-                  // );
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => SheetsPage()),
+                  );
                 },
               ),
             ],
