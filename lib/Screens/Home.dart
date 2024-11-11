@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:futuerx_dashboard/Screens/Faqs.dart';
 import 'package:futuerx_dashboard/Screens/News.dart';
 import 'package:futuerx_dashboard/Screens/Users.dart';
-import 'package:futuerx_dashboard/Screens/sheets.dart';
 // Import the FAQ and Lectures pages
 
 class Dashboard extends StatelessWidget {
@@ -16,62 +15,54 @@ class Dashboard extends StatelessWidget {
       ),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: GridView.count(
-            crossAxisCount: 2, // Two buttons per row
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
-            shrinkWrap: true,
-            children: [
-              // Users Button
-              DashboardButton(
-                icon: Icons.person,
-                label: 'Users',
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => UsersPage()),
+          padding: const EdgeInsets.all(16.0),
+          child: GridView.builder(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+              childAspectRatio: 1.1, // Adjust for card shape
+            ),
+            itemCount: 3,
+            itemBuilder: (context, index) {
+              switch (index) {
+                case 0:
+                  return DashboardButton(
+                    icon: Icons.person,
+                    label: 'Users',
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => UsersPage()),
+                      );
+                    },
                   );
-                },
-              ),
-
-              // News Button
-              DashboardButton(
-                icon: Icons.newspaper,
-                label: 'News',
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => NewsPage()),
+                case 1:
+                  return DashboardButton(
+                    icon: Icons.newspaper,
+                    label: 'News',
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => NewsPage()),
+                      );
+                    },
                   );
-                },
-              ),
-
-              // FAQ Button
-              DashboardButton(
-                icon: Icons.help_outline,
-                label: 'FAQ',
-                onPressed: () {
-
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => FAQs()),
+                case 2:
+                  return DashboardButton(
+                    icon: Icons.help_outline,
+                    label: 'FAQ',
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => FAQs()),
+                      );
+                    },
                   );
-                },
-              ),
-
-              // Lectures Button
-              DashboardButton(
-                icon: Icons.book,
-                label: 'Lectures Sheets',
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => SheetsPage()),
-                  );
-                },
-              ),
-            ],
+                default:
+                  return SizedBox.shrink();
+              }
+            },
           ),
         ),
       ),
@@ -79,7 +70,7 @@ class Dashboard extends StatelessWidget {
   }
 }
 
-// Reusable DashboardButton widget with icons, optimized for smaller size
+// Reusable DashboardButton widget with a modern card style
 class DashboardButton extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -93,37 +84,39 @@ class DashboardButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF141A2E),
-        padding: const EdgeInsets.all(12), // Reduced padding for compact size
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8), // Slightly rounded corners
-        ),
-      ).copyWith(
-        backgroundColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.pressed)) {
-            return const Color(0xFF1F2A45);
-          }
-          return const Color(0xFF141A2E);
-        }),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: Colors.white, size: 28), // Smaller icon size
-          const SizedBox(height: 6), // Reduced spacing
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 14, // Smaller font size
-              fontWeight: FontWeight.w500,
+    return InkWell(
+      onTap: onPressed,
+      borderRadius: BorderRadius.circular(12), // Rounded corners
+      splashColor: Colors.blue.withOpacity(0.3), // Splash color on tap
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF1A1F36),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 10,
+              offset: Offset(0, 4),
             ),
-          ),
-        ],
+          ],
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: Colors.white, size: 36), // Adjusted icon size
+            const SizedBox(height: 8),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16, // Adjusted font size for modern look
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

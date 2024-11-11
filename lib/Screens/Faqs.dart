@@ -125,8 +125,14 @@ class _FAQsState extends State<FAQs> {
     return Scaffold(
       backgroundColor: const Color(0xFF0A0E21), // Background color for the whole screen
       appBar: AppBar(
-        title: const Text('FAQs'),
+        title: const Text('FAQs',style: TextStyle(color: Colors.white),),
         backgroundColor: const Color(0xFF141A2E), // Matching app theme color
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showFAQDialog(),
