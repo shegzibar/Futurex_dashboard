@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:futuerx_dashboard/Screens/Faqs.dart';
 import 'package:futuerx_dashboard/Screens/News.dart';
 import 'package:futuerx_dashboard/Screens/Users.dart';
+import 'package:futuerx_dashboard/Screens/instruction.dart';
 // Import the FAQ and Lectures pages
 
 class Dashboard extends StatelessWidget {
@@ -55,10 +56,21 @@ class Dashboard extends StatelessWidget {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => FAQs()),
+                        MaterialPageRoute(builder: (context) =>  InstructionListPage()),
                       );
                     },
                   );
+                // case 3:
+                //   return DashboardButton(
+                //     icon: Icons.help_outline,
+                //     label: 'Instructions',
+                //     onPressed: () {
+                //       Navigator.push(
+                //         context,
+                //         MaterialPageRoute(builder: (context) => InstructionPage()),
+                //       );
+                //     },
+                //   );
                 default:
                   return SizedBox.shrink();
               }
