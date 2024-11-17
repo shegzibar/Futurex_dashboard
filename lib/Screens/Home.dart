@@ -3,7 +3,6 @@ import 'package:futuerx_dashboard/Screens/Faqs.dart';
 import 'package:futuerx_dashboard/Screens/News.dart';
 import 'package:futuerx_dashboard/Screens/Users.dart';
 import 'package:futuerx_dashboard/Screens/instruction.dart';
-// Import the FAQ and Lectures pages
 
 class Dashboard extends StatelessWidget {
   @override
@@ -18,13 +17,13 @@ class Dashboard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: GridView.builder(
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2, // Two grids per row
               mainAxisSpacing: 12,
               crossAxisSpacing: 12,
               childAspectRatio: 1.1, // Adjust for card shape
             ),
-            itemCount: 3,
+            itemCount: 4, // Adjust to 4 grids
             itemBuilder: (context, index) {
               switch (index) {
                 case 0:
@@ -56,23 +55,24 @@ class Dashboard extends StatelessWidget {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) =>  InstructionListPage()),
+                        MaterialPageRoute(builder: (context) => FAQs()),
                       );
                     },
                   );
-                // case 3:
-                //   return DashboardButton(
-                //     icon: Icons.help_outline,
-                //     label: 'Instructions',
-                //     onPressed: () {
-                //       Navigator.push(
-                //         context,
-                //         MaterialPageRoute(builder: (context) => InstructionPage()),
-                //       );
-                //     },
-                //   );
+                case 3:
+                  return DashboardButton(
+                    icon: Icons.book,
+                    label: 'Instructions',
+                    onPressed: () {
+                      // Replace with your Lectures page navigation
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => InstructionListPage()),
+                      );
+                    },
+                  );
                 default:
-                  return SizedBox.shrink();
+                  return const SizedBox.shrink();
               }
             },
           ),
@@ -108,7 +108,7 @@ class DashboardButton extends StatelessWidget {
             BoxShadow(
               color: Colors.black26,
               blurRadius: 10,
-              offset: Offset(0, 4),
+              offset: const Offset(0, 4),
             ),
           ],
         ),
