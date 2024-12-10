@@ -198,17 +198,15 @@ class _UsersPageState extends State<UsersPage> {
       return;
     }
 
-    _firestore
-        .collection('Students')
-        .where('index', isEqualTo: indexToCheck)
-        .get()
-        .then((querySnapshot) {
-      if (querySnapshot.docs.isNotEmpty) {
+    // Check if the document with the same index exists
+    _firestore.collection('Students').doc(indexToCheck).get().then((docSnapshot) {
+      if (docSnapshot.exists) {
         _showErrorDialog("This index already exists. Please use a unique index.");
       } else {
-        _firestore.collection('Students').add({
+        // Add user with the index as the document ID
+        _firestore.collection('Students').doc(indexToCheck).set({
           'fullName': _userNameController.text,
-          'index': _userIndexController.text,
+          'index': indexToCheck,
           'password': _userPasswordController.text,
           'email': _emailController.text,
           'gpa': double.tryParse(_gpaController.text) ?? 0.0,
@@ -216,8 +214,11 @@ class _UsersPageState extends State<UsersPage> {
           'majorId': _selectedMajor,
           'semester': _selectedSemester,
           'year': _selectedYear,
+        }).then((_) {
+          _showSuccessDialog("User added successfully!");
+        }).catchError((error) {
+          _showErrorDialog("An error occurred while adding the user: $error");
         });
-        _showSuccessDialog("User added successfully!");
       }
     }).catchError((error) {
       _showErrorDialog("An error occurred while checking the index: $error");
@@ -311,9 +312,9 @@ class _UsersPageState extends State<UsersPage> {
   }
 
   void _updateUserInFirestore(String userId) {
-    _firestore.collection('Students').doc(userId).update({
+    _firestore.collection('Students').doc(userId).set({
       'fullName': _userNameController.text,
-      'index': _userIndexController.text,
+      'index': userId, // Ensure the document ID matches the index
       'password': _userPasswordController.text,
       'email': _emailController.text,
       'gpa': double.tryParse(_gpaController.text) ?? 0.0,
@@ -354,7 +355,6 @@ class _UsersPageState extends State<UsersPage> {
       }).toList(),
     );
   }
-
 
   void _showErrorDialog(String message) {
     showDialog(
@@ -399,14 +399,21 @@ class _UsersPageState extends State<UsersPage> {
   }
 
   void _deleteUser(String id) {
-    _firestore.collection('Students').doc(id).delete();
+    _firestore.collection('Students').doc(id).delete().then((_) {
+      _showSuccessDialog("User deleted successfully!");
+    }).catchError((error) {
+      _showErrorDialog("An error occurred while deleting the user: $error");
+    });
   }
 
   void _deleteAllUsers() {
     _firestore.collection('Students').get().then((snapshot) {
-      for (DocumentSnapshot ds in snapshot.docs) {
-        ds.reference.delete();
+      for (var doc in snapshot.docs) {
+        doc.reference.delete();
       }
+      _showSuccessDialog("All users deleted successfully!");
+    }).catchError((error) {
+      _showErrorDialog("An error occurred while deleting users: $error");
     });
   }
 }
